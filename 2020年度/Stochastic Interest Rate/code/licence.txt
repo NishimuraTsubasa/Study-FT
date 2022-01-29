@@ -1,0 +1,6 @@
+Copyright (c) 2015, Daragh McInerney
+All rights reserved.
+
+The code made available with ``Stochastic Interest Rates'' is for educational purposes only. You can redistribute it and/or modify it provided that the redistributions of the source code retains the above copyright notice, this condition and the following disclaimer.
+      
+The code is provided for educational use only in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

@@ -1,0 +1,16 @@
+
+仮想環境を使いたいときは
+	「conda activate unsupervisedLearning」
+を入力すればよい．
+
+CD指定
+cd Path
+
+Path:
+"C:\Users\bldyr\OneDrive\デスクトップ\自己研鑽用\Github\Python\handson-unsupervised-learning-master"
+
+仮想環境を抜ける
+	「conda deactivate unsupervisedLearning」
+
+仮想環境の削除
+	「conda remove -n unsupervisedLearning --all」
