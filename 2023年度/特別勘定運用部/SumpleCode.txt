@@ -1,38 +1,31 @@
-Sub AdjustAxisTitlePositionBasedOnRange()
+Sub CenterAxisTitles()
 
     Dim cht As ChartObject
     Dim ax As Axis
-    Dim yAxisMax As Double
-    Dim yAxisMin As Double
-    Dim yOffset As Double
 
     'アクティブシート内の第一のグラフを対象とする
     Set cht = ThisWorkbook.Sheets("Sheet1").ChartObjects(1)
 
-    'Y軸の最大値と最小値を取得
-    Set ax = cht.Chart.Axes(xlValue, xlPrimary)
-    yAxisMax = ax.MaximumScale
-    yAxisMin = ax.MinimumScale
-
-    'Y軸の範囲に基づいてYオフセットを計算
-    yOffset = (yAxisMax - yAxisMin) * 0.05 '例：範囲の5%としています。必要に応じて調整してください。
-    
-    'X軸のタイトルの位置を調整
+    'X軸のタイトルを軸の中心に配置
     Set ax = cht.Chart.Axes(xlCategory, xlPrimary)
     If Not ax.HasTitle Then
         ax.HasTitle = True
     End If
     With ax.AxisTitle
-        .Top = cht.Top + cht.Height ' Y軸の範囲に基づくオフセットは不要
+        ' グラフの下端にタイトルを配置し、タイトルの高さの半分をオフセットとして上方向に移動
+        .Top = cht.Top + cht.Height - (.Height / 2)
     End With
 
-    'Y軸のタイトルの位置を調整
+    'Y軸のタイトルを軸の高さの中心に配置
     Set ax = cht.Chart.Axes(xlValue, xlPrimary)
     If Not ax.HasTitle Then
         ax.HasTitle = True
     End If
     With ax.AxisTitle
-        .Left = cht.Left - yOffset
+        ' グラフの上端を基準にして、グラフの高さの半分からタイトルの高さの半分を引いた位置にタイトルを配置
+        .Top = cht.Top + (cht.Height / 2) - (.Height / 2)
+        ' グラフの左端からタイトルの幅を引いた位置にタイトルを配置
+        .Left = cht.Left - .Width
     End With
 
 End Sub
