@@ -1,0 +1,39 @@
+Sub AdjustAxisTitlePositionBasedOnRange()
+
+    Dim cht As ChartObject
+    Dim ax As Axis
+    Dim yAxisMax As Double
+    Dim yAxisMin As Double
+    Dim xOffset As Double
+    Dim yOffset As Double
+
+    'アクティブシート内の第一のグラフを対象とする
+    Set cht = ThisWorkbook.Sheets("Sheet1").ChartObjects(1)
+
+    'Y軸の最大値と最小値を取得
+    Set ax = cht.Chart.Axes(xlValue, xlPrimary)
+    yAxisMax = ax.MaximumScale
+    yAxisMin = ax.MinimumScale
+
+    'Y軸の範囲に基づいてYオフセットを計算
+    yOffset = (yAxisMax - yAxisMin) * 0.05 '例：範囲の5%としています。必要に応じて調整してください。
+    
+    'X軸のタイトルの位置を調整
+    Set ax = cht.Chart.Axes(xlCategory, xlPrimary)
+    If Not ax.HasTitle Then
+        ax.HasTitle = True
+    End If
+    With ax.AxisTitle
+        .Top = cht.Top + cht.Height + xOffset ' xOffsetは追加で調整したい場合の値としています。
+    End With
+
+    'Y軸のタイトルの位置を調整
+    Set ax = cht.Chart.Axes(xlValue, xlPrimary)
+    If Not ax.HasTitle Then
+        ax.HasTitle = True
+    End If
+    With ax.AxisTitle
+        .Left = cht.Left - yOffset
+    End With
+
+End Sub
