@@ -4,7 +4,6 @@ Sub AdjustAxisTitlePositionBasedOnRange()
     Dim ax As Axis
     Dim yAxisMax As Double
     Dim yAxisMin As Double
-    Dim xOffset As Double
     Dim yOffset As Double
 
     'アクティブシート内の第一のグラフを対象とする
@@ -24,7 +23,7 @@ Sub AdjustAxisTitlePositionBasedOnRange()
         ax.HasTitle = True
     End If
     With ax.AxisTitle
-        .Top = cht.Top + cht.Height + xOffset ' xOffsetは追加で調整したい場合の値としています。
+        .Top = cht.Top + cht.Height ' Y軸の範囲に基づくオフセットは不要
     End With
 
     'Y軸のタイトルの位置を調整
