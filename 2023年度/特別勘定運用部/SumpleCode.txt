@@ -1,31 +1,18 @@
-Sub CenterAxisTitles()
-
-    Dim cht As ChartObject
-    Dim ax As Axis
-
-    'アクティブシート内の第一のグラフを対象とする
-    Set cht = ThisWorkbook.Sheets("Sheet1").ChartObjects(1)
-
-    'X軸のタイトルを軸の中心に配置
-    Set ax = cht.Chart.Axes(xlCategory, xlPrimary)
-    If Not ax.HasTitle Then
-        ax.HasTitle = True
-    End If
-    With ax.AxisTitle
-        ' グラフの下端にタイトルを配置し、タイトルの高さの半分をオフセットとして上方向に移動
-        .Top = cht.Top + cht.Height - (.Height / 2)
-    End With
-
-    'Y軸のタイトルを軸の高さの中心に配置
-    Set ax = cht.Chart.Axes(xlValue, xlPrimary)
-    If Not ax.HasTitle Then
-        ax.HasTitle = True
-    End If
-    With ax.AxisTitle
-        ' グラフの上端を基準にして、グラフの高さの半分からタイトルの高さの半分を引いた位置にタイトルを配置
-        .Top = cht.Top + (cht.Height / 2) - (.Height / 2)
-        ' グラフの左端からタイトルの幅を引いた位置にタイトルを配置
-        .Left = cht.Left - .Width
-    End With
-
-End Sub
+Function ExtractNumber(s As String) As String
+    Dim regex As Object
+    Dim matches As Object
+    Dim match As Variant
+    
+    ' Create a new RegExp object
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Global = True
+    regex.Pattern = "(\d+\.\d+|\d+)"
+    
+    ' Find matches in the input string
+    Set matches = regex.Execute(s)
+    
+    ' Iterate over matches and concatenate
+    For Each match In matches
+        ExtractNumber = ExtractNumber & match.Value
+    Next match
+End Function
