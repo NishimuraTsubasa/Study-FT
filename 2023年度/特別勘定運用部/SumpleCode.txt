@@ -1,18 +1,24 @@
 Function ExtractNumber(s As String) As String
-    Dim regex As Object
-    Dim matches As Object
-    Dim match As Variant
-    
-    ' Create a new RegExp object
-    Set regex = CreateObject("VBScript.RegExp")
-    regex.Global = True
-    regex.Pattern = "(\d+\.\d+|\d+)"
-    
-    ' Find matches in the input string
-    Set matches = regex.Execute(s)
-    
-    ' Iterate over matches and concatenate
-    For Each match In matches
-        ExtractNumber = ExtractNumber & match.Value
-    Next match
+    Dim i As Integer
+    Dim numString As String
+    Dim char As String
+
+    numString = ""
+
+    For i = 1 To Len(s)
+        char = Mid(s, i, 1)
+        If (char >= "0" And char <= "9") Or char = "." Then
+            ' 数字または小数点の場合
+            If char = "." And InStr(numString, ".") > 0 Then
+                ' すでに小数点が含まれている場合はスキップ
+            Else
+                numString = numString & char
+            End If
+        ElseIf numString <> "" And Right(numString, 1) <> "." Then
+            ' すでに数字が抽出されており、新たな非数字文字を検出した場合は終了
+            Exit For
+        End If
+    Next i
+
+    ExtractNumber = numString
 End Function
