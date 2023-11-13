@@ -1,0 +1,39 @@
+Sub SaveAndRestoreSolverSettings()
+    ' 元の設定を保存
+    Dim originalObjective As Range
+    Dim originalVariables As Range
+    Dim originalConstraints() As Variant
+    Dim originalSolverFinish As Integer
+    Dim i As Integer
+
+    With SolverOptions
+        Set originalObjective = Range(.ObjectiveCell)
+        Set originalVariables = Range(.VariableCells)
+        originalSolverFinish = .SolverFinish
+    End With
+
+    ' 制約条件の保存
+    ReDim originalConstraints(1 To SolverOptions.Constraints.Count, 1 To 3)
+    i = 1
+    For Each con In SolverOptions.Constraints
+        originalConstraints(i, 1) = con.CellRef
+        originalConstraints(i, 2) = con.Relation
+        originalConstraints(i, 3) = con.FormulaText
+        i = i + 1
+    Next con
+
+    ' 新しいソルバー設定を行い、ソルバーを実行
+    SolverReset
+    SolverOk SetCell:="目的セル", MaxMinVal:=3, ValueOf:=0, ByChange:="変数セル"
+    SolverAdd CellRef:="制約条件1", Relation:=1, FormulaText:="上限値1"
+    ' ここに他の制約条件を追加...
+    SolverSolve UserFinish:=True
+
+    ' 元の設定に戻す
+    SolverReset
+    SolverOk SetCell:=originalObjective.Address, MaxMinVal:=3, ValueOf:=0, ByChange:=originalVariables.Address
+    For i = 1 To UBound(originalConstraints, 1)
+        SolverAdd CellRef:=originalConstraints(i, 1), Relation:=originalConstraints(i, 2), FormulaText:=originalConstraints(i, 3)
+    Next i
+    SolverOptions SolverFinish:=originalSolverFinish
+End Sub
