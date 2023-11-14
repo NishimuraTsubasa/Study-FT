@@ -1,0 +1,52 @@
+import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import messagebox
+
+def open_file():
+    filepath = filedialog.askopenfilename(
+        title="Open file",
+        filetypes=(("CSV Files", "*.csv"), ("All Files", "*.*"))
+    )
+    return filepath
+
+def calculate_returns(df, return_type):
+    # ここに収益率を計算する処理を実装します
+    # return_typeに応じて異なる計算を行います
+    return df
+
+def process_file():
+    filepath = open_file()
+    if not filepath:
+        return
+
+    df = pd.read_csv(filepath)
+
+    # ピボットテーブルの作成
+    pivot_df = df.pivot_table(index='日付', columns='資産名', values='終値', aggfunc='first')
+
+    # 収益率の計算
+    if return_var.get():
+        pivot_df = calculate_returns(pivot_df, return_var.get())
+
+    # 出力ファイルパスの指定
+    output_path = filedialog.asksaveasfilename(
+        title="Save file",
+        filetypes=(("CSV Files", "*.csv"), ("All Files", "*.*"))
+    )
+    if output_path:
+        pivot_df.to_csv(output_path)
+
+# GUIの初期化
+root = tk.Tk()
+root.title("CSV Processor")
+
+return_var = tk.StringVar()
+
+# ボタンとチェックボックスの追加
+tk.Button(root, text="Open CSV and Process", command=process_file).pack()
+tk.Checkbutton(root, text="Calculate Arithmetic Returns", variable=return_var, onvalue='arithmetic', offvalue='').pack()
+tk.Checkbutton(root, text="Calculate Geometric Returns", variable=return_var, onvalue='geometric', offvalue='').pack()
+
+# GUIの実行
+root.mainloop()
