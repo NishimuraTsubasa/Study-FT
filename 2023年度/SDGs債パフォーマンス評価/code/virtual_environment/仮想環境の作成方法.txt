@@ -1,0 +1,12 @@
+≪仮想環境の作成手順≫
+[requirements.txt]を利用する場合
+① anaconda.prompt を起動し，以下のコマンドを入力する．
+conda create -n SDGs_investment python==3.9
+
+② 以下コマンドを入力することで，ライブラリをインストールする．
+pip install -r requirements.txt
+
+
+[SDGs_investment.yml]を利用する場合
+① anaconda.prompt を起動し，以下のコマンドを入力する．
+conda env create -n SDGs_investment -f SDGs_investment.yml
