@@ -58,6 +58,7 @@ dependencies:
     - colorlog==6.8.0
     - contourpy==1.2.0
     - cycler==0.12.1
+    - datetime==5.3
     - et-xmlfile==1.1.0
     - flatbuffers==23.5.26
     - fonttools==4.46.0
@@ -116,4 +117,5 @@ dependencies:
     - urllib3==2.1.0
     - werkzeug==3.0.1
     - wrapt==1.14.1
+    - zope-interface==6.1
 prefix: C:\Users\bldyr\anaconda3\envs\SDGs_investment
