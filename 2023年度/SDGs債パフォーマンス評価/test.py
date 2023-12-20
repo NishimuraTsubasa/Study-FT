@@ -198,3 +198,59 @@ def create_scatter_plots_by_sector_rating_flag(df, metric, rating_column, sector
 
 # 関数のテスト実行
 create_scatter_plots_by_sector_rating_flag(df, 'T-Spread', '信用格付け', '業種', '残存年数', 'merged_green_flag')
+
+
+
+# 散布図を作成しPDFに出力する関数（NaN値の処理と型の確認を追加）
+def create_scatter_plots_by_sector_rating_flag(df, metric, rating_column, sector_column, maturity_column, flag_column):
+    # dateでグループ化して各月末のデータを処理
+    for date, group in df.groupby('date'):
+        pdf_filename = f'{date.strftime("%Y-%m")}.pdf'
+
+        with PdfPages(pdf_filename) as pdf:
+            # 各セクターごとに処理
+            for sector in group[sector_column].unique():
+                sector_df = group[group[sector_column] == sector]
+
+                # NaN値の行を削除し、データ型を確認
+                sector_df = sector_df.dropna(subset=[rating_column])
+                if not np.issubdtype(sector_df[rating_column].dtype, np.number):
+                    # データ型が数値でなければスキップ
+                    continue
+
+                # 信用格付けを4つのグループに分割（四分位数を使用）
+                try:
+                    quartiles = pd.qcut(sector_df[rating_column], 4, labels=False, duplicates='drop')
+                    unique_quartiles = quartiles.unique()
+                except ValueError:
+                    # 四分位数の計算が不可能な場合は次のセクターへ
+                    continue
+
+                # サブプロットの作成
+                num_plots = len(unique_quartiles)
+                cols = 2
+                rows = (num_plots + 1) // cols
+                fig, axes = plt.subplots(rows, cols, figsize=(15, 10), squeeze=False)
+                fig.suptitle(f'{sector} - {date.strftime("%Y-%m")}')
+
+                for i, q in enumerate(unique_quartiles):
+                    ax = axes[i // 2, i % 2]
+                    quartile_df = sector_df[quartiles == q]
+                    sns.scatterplot(x=maturity_column, y=metric, 
+                                    hue=flag_column, palette=['blue', 'red'], 
+                                    data=quartile_df, ax=ax)
+                    ax.set_title(f'Quartile: {q+1}')
+                    ax.set_xlabel('残存年数')
+                    ax.set_ylabel(metric)
+                    ax.legend(title=flag_column)
+
+                for j in range(i + 1, rows * cols):
+                    axes[j // cols, j % cols].axis('off')
+
+                plt.tight_layout()
+                plt.subplots_adjust(top=0.9)
+                pdf.savefig()
+                plt.close()
+
+# 関数のテスト実行
+create_scatter_plots_by_sector_rating_flag(df, 'T-Spread', '信用格付け', '業種', '残存年数', 'merged_green_flag')
