@@ -92,3 +92,50 @@ def create_scatter_plots_by_sector_and_rating(df, metric, rating_column, sector_
 # ここでは、先ほどと同じテストデータを使用し、新しいカラム名指定引数を適用します。
 create_scatter_plots_by_sector_and_rating(df, 'T-Spread', '信用格付け', '業種', '残存年数')
 
+
+
+# 散布図を作成しPDFに出力する関数（修正版）
+def create_scatter_plots_by_sector_and_rating(df, metric, rating_column, sector_column, maturity_column):
+    # dateでグループ化して各月末のデータを処理
+    for date, group in df.groupby('date'):
+        pdf_filename = f'{date.strftime("%Y-%m")}.pdf'
+
+        with PdfPages(pdf_filename) as pdf:
+            # 各セクターごとに処理
+            for sector in group[sector_column].unique():
+                sector_df = group[group[sector_column] == sector]
+
+                # 信用格付けのユニークな値を取得
+                ratings = sector_df[rating_column].unique()
+
+                # サブプロットの数を決定（最大6つ：3x2グリッド）
+                num_plots = min(len(ratings), 6)
+                cols = 3
+                rows = (num_plots + 2) // cols
+
+                # サブプロットの作成
+                fig, axes = plt.subplots(rows, cols, figsize=(15, 10), squeeze=False)
+                fig.suptitle(f'{sector} - {date.strftime("%Y-%m")}')
+
+                for i, rating in enumerate(ratings):
+                    if i < num_plots:
+                        ax = axes[i // cols, i % cols]
+                        rating_df = sector_df[sector_df[rating_column] == rating]
+
+                        if not rating_df.empty:
+                            sns.scatterplot(x=maturity_column, y=metric, data=rating_df, ax=ax)
+                            ax.set_title(f'Rating: {rating}')
+                            ax.set_xlabel('残存年数')
+                            ax.set_ylabel(metric)
+
+                # 空のサブプロットを非表示にする
+                for j in range(i + 1, rows * cols):
+                    axes[j // cols, j % cols].axis('off')
+
+                plt.tight_layout()
+                plt.subplots_adjust(top=0.9)  # タイトルのためのスペースを確保
+                pdf.savefig()
+                plt.close()
+
+# 関数のテスト実行
+create_scatter_plots_by_sector_and_rating(df, 'T-Spread', '信用格付け', '業種', '残存年数')
