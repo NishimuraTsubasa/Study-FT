@@ -60,3 +60,35 @@ df['date'] = df['date'].apply(convert_int_to_date)
 # PDF生成の実行
 generated_pdfs = create_scatter_plots_by_sector_and_rating(df, 'T-Spread')
 generated_pdfs
+
+
+# 散布図を作成しPDFに出力する関数（カラム名を引数で指定可能）
+def create_scatter_plots_by_sector_and_rating(df, metric, rating_column, sector_column, maturity_column):
+    # dateでグループ化して各月末のデータを処理
+    for date, group in df.groupby('date'):
+        pdf_filename = f'{date.strftime("%Y-%m")}.pdf'
+
+        with PdfPages(pdf_filename) as pdf:
+            # 各セクターごとに処理
+            for sector in group[sector_column].unique():
+                sector_df = group[group[sector_column] == sector]
+
+                # 各信用格付けごとに散布図を作成
+                for rating in sector_df[rating_column].unique():
+                    rating_df = sector_df[sector_df[rating_column] == rating]
+
+                    # データが存在する場合のみ散布図を描画
+                    if not rating_df.empty:
+                        plt.figure(figsize=(10, 6))
+                        sns.scatterplot(x=maturity_column, y=metric, data=rating_df)
+                        plt.title(f'{sector} - {rating} - {date.strftime("%Y-%m")} - {metric}')
+                        plt.xlabel('残存年数')
+                        plt.ylabel(metric)
+
+                        pdf.savefig()
+                        plt.close()
+
+# 関数のテスト実行（カラム名を引数として指定）
+# ここでは、先ほどと同じテストデータを使用し、新しいカラム名指定引数を適用します。
+create_scatter_plots_by_sector_and_rating(df, 'T-Spread', '信用格付け', '業種', '残存年数')
+
