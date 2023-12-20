@@ -1,52 +1,62 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import seaborn as sns
-from datetime import datetime
-import os
 
-# 仮のデータフレームを作成（実際のデータに基づいて調整が必要）
-# この例ではランダムなデータを使用
-dates = pd.date_range(start='2022-03-31', end='2023-12-31', freq='M')
-data = {
-    '残存年数': pd.np.random.rand(len(dates)) * 10,  # 0〜10年
-    'date': dates,
-    '信用格付け': pd.np.random.choice(['AAA', 'AA', 'A', 'BBB'], len(dates)),
-    '業種': pd.np.random.choice(['Sector1', 'Sector2', 'Sector3'], len(dates)),
-    'T-Spread': pd.np.random.rand(len(dates)) * 200,  # 0〜200基点
-    'G-Spread': pd.np.random.rand(len(dates)) * 200,  # 0〜200基点
-    'OAS': pd.np.random.rand(len(dates)) * 200  # 0〜200基点
-}
-df = pd.DataFrame(data)
+# 整数型の日付を実際の日付に変換する関数
+def convert_int_to_date(int_date):
+    str_date = str(int_date)
+    year = int(str_date[:4])
+    month = int(str_date[4:6])
+    date_obj = pd.Timestamp(year=year, month=month, day=1) - pd.Timedelta(days=1)
+    return date_obj
 
-# 指定された指標に基づいて散布図を作成しPDFに出力する関数
+# 散布図を作成しPDFに出力する関数
 def create_scatter_plots_by_sector_and_rating(df, metric):
+    pdf_files = []
+
     # dateでグループ化して各月末のデータを処理
     for date, group in df.groupby('date'):
-        # PDFファイル名（YYYY-MM.pdf形式）
-        pdf_filename = date.strftime('%Y-%m') + '.pdf'
-        
+        pdf_filename = f'{date.strftime("%Y-%m")}.pdf'
+        pdf_files.append(pdf_filename)
+
         with PdfPages(pdf_filename) as pdf:
             # 各セクターごとに処理
             for sector in group['業種'].unique():
-                # セクターごとのデータフレームを取得
                 sector_df = group[group['業種'] == sector]
 
-                # 信用格付けごとに散布図を作成
-                plt.figure(figsize=(10, 6))
-                sns.scatterplot(x='残存年数', y=metric, hue='信用格付け', data=sector_df)
-                plt.title(f'Sector: {sector} - {date.strftime("%Y-%m")} - {metric}')
-                plt.legend(title='信用格付け')
-                plt.xlabel('残存年数')
-                plt.ylabel(metric)
-                
-                # PDFにページを追加
-                pdf.savefig()
-                plt.close()
+                # 各信用格付けごとに散布図を作成
+                for rating in sector_df['信用格付け'].unique():
+                    rating_df = sector_df[sector_df['信用格付け'] == rating]
 
-    # 完成したPDFファイルのパスを返す
-    return os.listdir('.')
+                    # データが存在する場合のみ散布図を描画
+                    if not rating_df.empty:
+                        plt.figure(figsize=(10, 6))
+                        sns.scatterplot(x='残存年数', y=metric, data=rating_df)
+                        plt.title(f'{sector} - {rating} - {date.strftime("%Y-%m")} - {metric}')
+                        plt.xlabel('残存年数')
+                        plt.ylabel(metric)
 
-# 仮のデータフレームを使って関数をテスト（T-Spreadを指標とする）
+                        pdf.savefig()
+                        plt.close()
+
+    return pdf_files
+
+# テスト用データフレームの作成
+dates = [202203, 202204, 202205, 202206, 202207, 202208, 202209, 202210, 202211, 202212, 202301, 202302, 202303, 202304, 202305, 202306, 202307, 202308, 202309, 202310, 202311, 202312]
+data = {
+    '残存年数': np.random.rand(len(dates)) * 10,
+    'date': dates,
+    '信用格付け': np.random.choice(['AAA', 'AA', 'A', 'BBB'], len(dates)),
+    '業種': np.random.choice(['Sector1', 'Sector2', 'Sector3'], len(dates)),
+    'T-Spread': np.random.rand(len(dates)) * 200,
+    'G-Spread': np.random.rand(len(dates)) * 200,
+    'OAS': np.random.rand(len(dates)) * 200
+}
+df = pd.DataFrame(data)
+df['date'] = df['date'].apply(convert_int_to_date)
+
+# PDF生成の実行
 generated_pdfs = create_scatter_plots_by_sector_and_rating(df, 'T-Spread')
 generated_pdfs
