@@ -139,3 +139,62 @@ def create_scatter_plots_by_sector_and_rating(df, metric, rating_column, sector_
 
 # 関数のテスト実行
 create_scatter_plots_by_sector_and_rating(df, 'T-Spread', '信用格付け', '業種', '残存年数')
+
+
+
+
+
+
+# 散布図を作成しPDFに出力する関数（修正版）
+def create_scatter_plots_by_sector_rating_flag(df, metric, rating_column, sector_column, maturity_column, flag_column):
+    # dateでグループ化して各月末のデータを処理
+    for date, group in df.groupby('date'):
+        pdf_filename = f'{date.strftime("%Y-%m")}.pdf'
+
+        with PdfPages(pdf_filename) as pdf:
+            # 各セクターごとに処理
+            for sector in group[sector_column].unique():
+                sector_df = group[group[sector_column] == sector]
+
+                # 信用格付けを4つのグループに分割（四分位数を使用、重複削除）
+                try:
+                    quartiles = pd.qcut(sector_df[rating_column], 4, labels=False, duplicates='drop')
+                    unique_quartiles = quartiles.unique()
+                except ValueError:
+                    # 四分位数の計算が不可能な場合は次のセクターへ
+                    continue
+
+                # サブプロットの数を実際に生成されたビンの数に基づいて設定
+                num_plots = len(unique_quartiles)
+                cols = 2
+                rows = (num_plots + 1) // cols
+
+                # サブプロットの作成
+                fig, axes = plt.subplots(rows, cols, figsize=(15, 10), squeeze=False)
+                fig.suptitle(f'{sector} - {date.strftime("%Y-%m")}')
+
+                for i, q in enumerate(unique_quartiles):
+                    ax = axes[i // cols, i % cols]
+                    # 対応する四分位のデータをフィルタリング
+                    quartile_df = sector_df[quartiles == q]
+
+                    # フラグに基づいて色分けして散布図を描画
+                    sns.scatterplot(x=maturity_column, y=metric, 
+                                    hue=flag_column, palette=['blue', 'red'], 
+                                    data=quartile_df, ax=ax)
+                    ax.set_title(f'Quartile: {q+1}')
+                    ax.set_xlabel('残存年数')
+                    ax.set_ylabel(metric)
+                    ax.legend(title=flag_column)
+
+                # 空のサブプロットを非表示にする
+                for j in range(i + 1, rows * cols):
+                    axes[j // cols, j % cols].axis('off')
+
+                plt.tight_layout()
+                plt.subplots_adjust(top=0.9)  # タイトルのためのスペースを確保
+                pdf.savefig()
+                plt.close()
+
+# 関数のテスト実行
+create_scatter_plots_by_sector_rating_flag(df, 'T-Spread', '信用格付け', '業種', '残存年数', 'merged_green_flag')
