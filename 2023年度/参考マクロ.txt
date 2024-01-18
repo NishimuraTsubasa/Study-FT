@@ -1,0 +1,31 @@
+Sub CopyDataFromAnotherWorkbook()
+    Dim sourceWorkbook As Workbook
+    Dim sourceSheet As Worksheet
+    Dim destSheet As Worksheet
+    Dim fileDialog As FileDialog
+    Dim selectedFile As String
+
+    ' ファイル選択ダイアログを開く
+    Set fileDialog = Application.FileDialog(msoFileDialogFilePicker)
+    fileDialog.AllowMultiSelect = False
+    fileDialog.Title = "エクセルファイルを選択"
+    If fileDialog.Show = -1 Then
+        selectedFile = fileDialog.SelectedItems(1)
+    Else
+        ' ユーザーがキャンセルした場合
+        MsgBox "ファイルが選択されませんでした。"
+        Exit Sub
+    End If
+
+    ' ワークブックとシートを設定
+    Set sourceWorkbook = Workbooks.Open(selectedFile)
+    Set sourceSheet = sourceWorkbook.Sheets("コピー元のシート名") ' コピー元のシート名を設定
+    Set destSheet = ThisWorkbook.Sheets("貼り付け先のシート名") ' 貼り付け先のシート名を設定
+
+    ' コピー＆ペースト
+    sourceSheet.Cells.Copy destSheet.Cells
+
+    ' ソースワークブックを閉じる
+    sourceWorkbook.Close False
+    Set sourceWorkbook = Nothing
+End Sub
