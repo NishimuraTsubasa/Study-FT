@@ -153,7 +153,7 @@ def create_scatter_plots_by_sector_rating_flag(df, metric, rating_column, sector
 
         with PdfPages(pdf_filename) as pdf:
             # 各セクターごとに処理
-            for sector in group[sector_column].unique():
+            for sector in group[group[flag_column] == True][sector_column].unique():
                 sector_df = group[group[sector_column] == sector]
 
                 # 信用格付けを4つのグループに分割（四分位数を使用、重複削除）
