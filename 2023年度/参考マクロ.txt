@@ -29,3 +29,19 @@ Sub CopyDataFromAnotherWorkbook()
     sourceWorkbook.Close False
     Set sourceWorkbook = Nothing
 End Sub
+
+Function CumulativeReturn(rng As Range) As Double
+    Dim initialValue As Double
+    Dim finalValue As Double
+
+    ' 範囲の最初と最後の値を取得
+    initialValue = rng.Cells(1, 1).Value
+    finalValue = rng.Cells(rng.Cells.Count, 1).Value
+
+    ' 累積リターンの計算
+    If initialValue <> 0 Then
+        CumulativeReturn = (finalValue / initialValue - 1) * 100
+    Else
+        CumulativeReturn = 0
+    End If
+End Function
